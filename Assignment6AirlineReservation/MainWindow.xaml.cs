@@ -36,6 +36,8 @@ namespace Assignment6AirlineReservation
 
         Label lblPassenger;
 
+        clsPassengers currentPassenger;
+
         int iFlightID;
 
         public MainWindow()
@@ -249,6 +251,7 @@ namespace Assignment6AirlineReservation
                 }
 
                 clsPassengers passenger = cbChoosePassenger.SelectedItem as clsPassengers;
+                currentPassenger = passenger;
 
                 if (passenger != null && passenger.sSeatNumber != "0")
                 {
@@ -353,7 +356,9 @@ namespace Assignment6AirlineReservation
 
         }
 
-
+        /// <summary>
+        /// called when change seat button is clicked. Method will change all unoccupied seats click function.
+        /// </summary>
         private void changeSeatClickFunction()
         {
             switch (this.iFlightID)
@@ -362,9 +367,10 @@ namespace Assignment6AirlineReservation
                     for (int i = 0; i < 15; i++)
                     {
                         Label lblFilledSeats = (Label)this.FindName($"SeatA{i}");
-                        if (lblFilledSeats.Background != Brushes.Red)
+                        if (lblFilledSeats.Background != Brushes.Red && lblFilledSeats != null)
                         {
-                            lblFilledSeats.MouseLeftButtonUp = changeSeatMouseClick;
+                            lblFilledSeats.MouseLeftButtonUp -= Seati_MouseLeftButtonUp;
+                            lblFilledSeats.MouseLeftButtonUp += changeSeatMouseClick;
 
                         }
 
@@ -375,7 +381,13 @@ namespace Assignment6AirlineReservation
                 case 2:
                     for (int i = 0; i < 16; i++)
                     {
+                        Label lblFilledSeats = (Label)this.FindName($"SeatA{i}");
+                        if (lblFilledSeats.Background != Brushes.Red && lblFilledSeats != null)
+                        {
+                            lblFilledSeats.MouseLeftButtonUp -= Seati_MouseLeftButtonUp;
+                            lblFilledSeats.MouseLeftButtonUp += changeSeatMouseClick;
 
+                        }
 
                     }
 
