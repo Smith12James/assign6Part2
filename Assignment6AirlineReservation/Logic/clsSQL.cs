@@ -15,7 +15,7 @@ namespace Assignment6AirlineReservation.Logic
         /// <returns></returns>
         public string selectFlightInfo()
         {
-            return "SELECT Flight_ID, Flight_Number, Aircraft_Type FROM FLIGHT";
+            return "SELECT Flight_ID, Flight_Number, Aircraft_Type FROM FLIGHT;";
 
         }
 
@@ -38,7 +38,7 @@ namespace Assignment6AirlineReservation.Logic
         /// <returns></returns>
         public string insertIntoPassenger(string sFirstName, string sLastName)
         {
-            return $"INSERT INTO PASSENGER (First_Name, Last_Name) VALUES ('{sFirstName}', '{sLastName}')";
+            return $"INSERT INTO PASSENGER (First_Name, Last_Name) VALUES ('{sFirstName}', '{sLastName}');";
 
         }
 
@@ -50,7 +50,7 @@ namespace Assignment6AirlineReservation.Logic
         /// <returns></returns>
         public string selectPassengerID(string sFirstName, string sLastName)
         {
-            return $"SELECT Passenger_ID from Passenger where First_Name = '{sFirstName}' AND Last_Name = '{sLastName}'";
+            return $"SELECT Passenger_ID from Passenger where First_Name = '{sFirstName}' AND Last_Name = '{sLastName}';";
 
         }
 
@@ -60,7 +60,7 @@ namespace Assignment6AirlineReservation.Logic
         /// <returns></returns>
         public string insertIntoLinkTable(int iFlightID, int iPassengerID)
         {
-            return $"INSERT INTO Flight_Passenger_Link(Flight_ID, Passenger_ID) VALUES({iFlightID}, {iPassengerID});";
+            return $"INSERT INTO Flight_Passenger_Link(Flight_ID, Passenger_ID, Seat_Number) VALUES({iFlightID}, {iPassengerID}, '0');";
 
         }
 
@@ -73,7 +73,7 @@ namespace Assignment6AirlineReservation.Logic
         /// <returns></returns>
         public string updateSeatNumber(string sSeatNumber, int iFlightID, int iPassengerID)
         {
-            return $"UPDATE FLIGHT_PASSENGER_LINK SET Seat_Number = {sSeatNumber} WHERE FLIGHT_ID = {iFlightID} AND PASSENGER_ID = {iPassengerID}";
+            return $"UPDATE FLIGHT_PASSENGER_LINK SET Seat_Number = '{sSeatNumber}' WHERE FLIGHT_ID = {iFlightID} AND PASSENGER_ID = {iPassengerID};";
 
         }
 

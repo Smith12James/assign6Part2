@@ -59,6 +59,7 @@
     <Compile Include="Common\clsFlights.cs" />
     <Compile Include="Common\clsPassengers.cs" />
     <Compile Include="Logic\clsAddPassenger.cs" />
+    <Compile Include="Logic\clsChangeSeat.cs" />
     <Compile Include="Logic\clsFlightManager.cs" />
     <Compile Include="Logic\clsPassengerManager.cs" />
     <Compile Include="Logic\clsSQL.cs" />

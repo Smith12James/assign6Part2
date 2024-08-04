@@ -250,7 +250,7 @@ namespace Assignment6AirlineReservation
 
                 clsPassengers passenger = cbChoosePassenger.SelectedItem as clsPassengers;
 
-                if (passenger != null)
+                if (passenger != null && passenger.sSeatNumber != "0")
                 {
                     // again used as the grids used have different naming conventions. Seat1 vs SeatA1
                     switch (this.iFlightID)
@@ -270,6 +270,11 @@ namespace Assignment6AirlineReservation
                     }
 
                     lblPassengersSeatNumber.Content = passenger.sSeatNumber;
+
+                }
+                else if (passenger.sSeatNumber == "0")
+                {
+                    
 
                 }
                
@@ -293,7 +298,7 @@ namespace Assignment6AirlineReservation
         {
             foreach (clsPassengers passenger in passengerList)
             {
-                if (passenger.sSeatNumber != null)
+                if (passenger.sSeatNumber != "0")
                 {
                     string sSeatNum = passenger.sSeatNumber;
 
@@ -330,6 +335,54 @@ namespace Assignment6AirlineReservation
                 HandleError(MethodInfo.GetCurrentMethod().DeclaringType.Name,
                     MethodInfo.GetCurrentMethod().Name, ex.Message);
             }
+        }
+
+        /// <summary>
+        /// this handles all logic pertaining to changing passenger seat
+        /// </summary>
+        private void changeSeat(int iPassengerID, string sSeatNumber)
+        {
+            cmdAddPassenger.IsEnabled = false;
+            cmdDeletePassenger.IsEnabled = false;
+
+            clsChangeSeat clsChangeSeat = new clsChangeSeat();
+
+            clsChangeSeat.changeSeat(this.iFlightID, iPassengerID, sSeatNumber);
+
+            passengerCmbobx(this.iFlightID);
+
+        }
+
+
+        private void changeSeatClickFunction()
+        {
+            switch (this.iFlightID)
+            {
+                case 1:
+                    for (int i = 0; i < 15; i++)
+                    {
+                        Label lblFilledSeats = (Label)this.FindName($"SeatA{i}");
+                        if (lblFilledSeats.Background != Brushes.Red)
+                        {
+                            lblFilledSeats.MouseLeftButtonUp = changeSeatMouseClick;
+
+                        }
+
+                    }
+
+                    break;
+
+                case 2:
+                    for (int i = 0; i < 16; i++)
+                    {
+
+
+                    }
+
+                    break;
+
+            }
+
         }
 
         /// <summary>
@@ -373,6 +426,13 @@ namespace Assignment6AirlineReservation
             }
 
             //lblPassengersSeatNumber.Content = lblName;
+
+        }
+
+
+        private void changeSeatMouseClick(object sender, MouseButtonEventArgs e)
+        {
+
 
         }
 
