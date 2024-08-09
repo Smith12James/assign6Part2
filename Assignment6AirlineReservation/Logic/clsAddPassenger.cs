@@ -24,37 +24,47 @@ namespace Assignment6AirlineReservation.Logic
         /// </summary>
         public void AddToDB(string sFirstName, string sLastName, int iFlightID)
         {
-            if (sFirstName.Length < 2 || sLastName.Length < 2)
+            try
             {
-                throw new Exception("First and Last name must be at least 2 characters long");
-
-            }
-            else
-            {
-                clsDB.ExecuteNonQuery(clsSQL.insertIntoPassenger(sFirstName, sLastName));
-
-                int i = 0;
-                DataSet ds = clsDB.ExecuteSQLStatement(clsSQL.selectPassengerID(sFirstName, sLastName), ref i);
-
-                int iNewPassengerID = 0;
-
-                foreach (DataRow dr in ds.Tables[0].Rows) 
+                if (sFirstName.Length < 2 || sLastName.Length < 2)
                 {
-                    iNewPassengerID = (int)dr["Passenger_ID"];
-
-                }
-
-                if (iNewPassengerID == 0)
-                {
-                    throw new Exception("Error creating/locating new passenger");
+                    throw new Exception("First and Last name must be at least 2 characters long");
 
                 }
                 else
                 {
-                    clsDB.ExecuteNonQuery(clsSQL.insertIntoLinkTable(iFlightID, iNewPassengerID));
+                    clsDB.ExecuteNonQuery(clsSQL.insertIntoPassenger(sFirstName, sLastName));
+
+                    int i = 0;
+                    DataSet ds = clsDB.ExecuteSQLStatement(clsSQL.selectPassengerID(sFirstName, sLastName), ref i);
+
+                    int iNewPassengerID = 0;
+
+                    foreach (DataRow dr in ds.Tables[0].Rows)
+                    {
+                        iNewPassengerID = (int)dr["Passenger_ID"];
+
+                    }
+
+                    if (iNewPassengerID == 0)
+                    {
+                        throw new Exception("Error creating/locating new passenger");
+
+                    }
+                    else
+                    {
+                        clsDB.ExecuteNonQuery(clsSQL.insertIntoLinkTable(iFlightID, iNewPassengerID));
+
+                    }
 
                 }
-                
+
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+
             }
 
         }

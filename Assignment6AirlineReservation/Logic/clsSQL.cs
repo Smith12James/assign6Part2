@@ -77,5 +77,28 @@ namespace Assignment6AirlineReservation.Logic
 
         }
 
+        /// <summary>
+        /// delete passenger link using flight ID and passenger ID. This is only to delete the link.
+        /// </summary>
+        /// <param name="iFlightID"></param>
+        /// <param name="iPassengerID"></param>
+        /// <returns></returns>
+        public string deletePassengerLink(int iFlightID, int iPassengerID)
+        {
+            return $"Delete FROM FLIGHT_PASSENGER_LINK WHERE FLIGHT_ID = {iFlightID} AND PASSENGER_ID = {iPassengerID};";
+
+        }
+
+        /// <summary>
+        /// delete passenger using passenger ID. This will need to be executed after deletePassengerLink()
+        /// </summary>
+        /// <param name="iPassengerID"></param>
+        /// <returns></returns>
+        public string deletePassenger(int iPassengerID)
+        {
+            return $"Delete FROM PASSENGER WHERE PASSENGER_ID = {iPassengerID};";
+
+        }
+
     }
 }

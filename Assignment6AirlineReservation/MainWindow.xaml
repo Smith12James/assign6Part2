@@ -18,8 +18,8 @@
         </Grid.RowDefinitions>
         <Border Grid.Column="1" Margin="15,0,0,0" Grid.Row="1" Padding="0,10">
             <Grid x:Name="gPassengerCommands" IsEnabled="False">
-                <Button x:Name="cmdChangeSeat" Content="Change Seat" HorizontalAlignment="Left" VerticalAlignment="Top" Width="127" Height="25"/>
-                <Button x:Name="cmdDeletePassenger" Content="Delete Passenger" HorizontalAlignment="Left" Margin="158,0,0,0" VerticalAlignment="Bottom" Width="118" Height="25"/>
+                <Button x:Name="cmdChangeSeat" Content="Change Seat" HorizontalAlignment="Left" VerticalAlignment="Top" Width="127" Height="25" Click="cmdChangeSeat_Click"/>
+                <Button x:Name="cmdDeletePassenger" Content="Delete Passenger" HorizontalAlignment="Left" Margin="158,0,0,0" VerticalAlignment="Bottom" Width="118" Height="25" Click="cmdDeletePassenger_Click"/>
                 <Button x:Name="cmdAddPassenger" Content="Add Passenger" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="127" Height="25" Click="cmdAddPassenger_Click"/>
             </Grid>
         </Border>
@@ -53,9 +53,9 @@
                     <ColumnDefinition Width="87*"/>
                     <ColumnDefinition Width="182*"/>
                 </Grid.ColumnDefinitions>
-                <Label x:Name="lblSeatTakenSquare" Content="" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FFFD0000" Height="40" Width="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="White" FontSize="14" BorderBrush="White" BorderThickness="1" Margin="0"/>
-                <Label x:Name="lblSeatEmptySquare" Content="" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FF0023FD" Height="40" Width="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="White" FontSize="14" BorderBrush="White" BorderThickness="1" Margin="0" Grid.Row="1"/>
-                <Label x:Name="lblSeatSelectedSquare" Content="" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FF00FD00" Height="40" Width="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="White" FontSize="14" BorderBrush="White" BorderThickness="1" Margin="0" Grid.Row="2"/>
+                <Label x:Name="lblSeatTakenSquare" Content="" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Red" Height="40" Width="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="White" FontSize="14" BorderBrush="White" BorderThickness="1" Margin="0"/>
+                <Label x:Name="lblSeatEmptySquare" Content="" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Blue" Height="40" Width="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="White" FontSize="14" BorderBrush="White" BorderThickness="1" Margin="0" Grid.Row="1"/>
+                <Label x:Name="lblSeatSelectedSquare" Content="" HorizontalAlignment="Center" VerticalAlignment="Center" Background="ForestGreen" Height="40" Width="40" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="White" FontSize="14" BorderBrush="White" BorderThickness="1" Margin="0" Grid.Row="2"/>
                 <Label x:Name="lblSeatTaken" Content="Seat Taken" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Grid.Column="1"/>
                 <Label x:Name="lblSeatEmpty" Content="Seat Empty" HorizontalAlignment="Left" Margin="10,10,0,13" VerticalAlignment="Center" Grid.Column="1" Grid.Row="1"/>
                 <Label x:Name="lblSeatSelected" Content="Seat Selected" HorizontalAlignment="Left" Margin="10,10,0,14" VerticalAlignment="Center" Grid.Column="1" Grid.Row="2"/>

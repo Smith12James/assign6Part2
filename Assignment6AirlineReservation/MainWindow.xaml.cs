@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -25,20 +26,44 @@ namespace Assignment6AirlineReservation
     /// </summary>
     public partial class MainWindow : Window
     {
-        clsDataAccess clsData;
+        /// <summary>
+        /// initialize window to add passengers
+        /// </summary>
         wndAddPassenger wndAddPass;
 
-        clsSQL clsSQL = new clsSQL();
+        /// <summary>
+        /// initialize flightManager class
+        /// </summary>
         clsFlightManager flightManager = new clsFlightManager();
+        /// <summary>
+        /// initialize passengerManager class
+        /// </summary>
         clsPassengerManager passengerManager = new clsPassengerManager();
 
+        /// <summary>
+        /// initialize passengerList to query at a later time.
+        /// </summary>
         List<clsPassengers> passengerList;
 
+        /// <summary>
+        /// current passenger label
+        /// </summary>
         Label lblPassenger;
 
+        /// <summary>
+        /// current passenger using generic data type clsPassengers
+        /// </summary>
         clsPassengers currentPassenger;
 
+        /// <summary>
+        /// current flight ID based on combobox selection
+        /// </summary>
         int iFlightID;
+
+        /// <summary>
+        /// all current filled seats array.
+        /// </summary>
+        string[] sFilledSeatsArr;
 
         public MainWindow()
         {
@@ -86,18 +111,27 @@ namespace Assignment6AirlineReservation
         /// </summary>
         public void flightCmbobx()
         {
-            // initialize clsFlights list
-            List<clsFlights> flights = flightManager.GetFlights();
-
-            if (flights.Count < 1)
+            try
             {
-                throw new Exception("Error gathering flight info.");
+                // initialize clsFlights list
+                List<clsFlights> flights = flightManager.GetFlights();
+
+                if (flights.Count < 1)
+                {
+                    throw new Exception("Error gathering flight info.");
+
+                }
+                else
+                {
+                    cbChooseFlight.ItemsSource = flights;
+
+                }
 
             }
-            else
+            catch (Exception ex)
             {
-                cbChooseFlight.ItemsSource = flights;
-
+                HandleError(MethodInfo.GetCurrentMethod().DeclaringType.Name,
+                    MethodInfo.GetCurrentMethod().Name, ex.Message);
             }
 
         }
@@ -114,7 +148,11 @@ namespace Assignment6AirlineReservation
                 cmdDeletePassenger.IsEnabled = false;
                 cmdChangeSeat.IsEnabled = false;
 
+                cbChoosePassenger.SelectionChanged -= cbChoosePassenger_SelectionChanged;
                 cbChoosePassenger.ItemsSource = null;
+                cbChoosePassenger.Items.Clear();
+                cbChoosePassenger.SelectedIndex = -1;
+                cbChoosePassenger.SelectionChanged += cbChoosePassenger_SelectionChanged;
 
                 cbChoosePassenger.IsEnabled = true;
                 gPassengerCommands.IsEnabled = true;
@@ -135,14 +173,14 @@ namespace Assignment6AirlineReservation
                     switch (iFlightID)
                     {
                         case 1:
-                            CanvasA380.Visibility = Visibility.Hidden;
-                            Canvas767.Visibility = Visibility.Visible;
+                            CanvasA380.Visibility = Visibility.Visible;
+                            Canvas767.Visibility = Visibility.Hidden;
 
                             break;
 
                         case 2:
-                            Canvas767.Visibility = Visibility.Hidden;
-                            CanvasA380.Visibility = Visibility.Visible;
+                            Canvas767.Visibility = Visibility.Visible;
+                            CanvasA380.Visibility = Visibility.Hidden;
 
                             break;
 
@@ -203,32 +241,41 @@ namespace Assignment6AirlineReservation
         /// </summary>
         private void passengerCmbobx(int iFlight)
         {
-            this.iFlightID = iFlight;
-
-            // if passengerList is not null clear all items
-            if (passengerList != null)
+            try
             {
-                passengerList.Clear();
+                this.iFlightID = iFlight;
+
+                // if passengerList is not null clear all items
+                if (passengerList != null)
+                {
+                    passengerList.Clear();
+
+                }
+
+                passengerList = passengerManager.GetPassengers(iFlight);
+                cbChoosePassenger.ItemsSource = passengerList;
+
+                cbChoosePassenger.Items.Refresh();
+
+                switch (iFlight)
+                {
+                    case 1:
+                        fillSeats("SeatA", passengerList);
+
+                        break;
+
+                    case 2:
+                        fillSeats("Seat", passengerList);
+
+                        break;
+
+                }
 
             }
-            
-            passengerList = passengerManager.GetPassengers(iFlight);
-            cbChoosePassenger.ItemsSource = passengerList;
-
-            cbChoosePassenger.Items.Refresh();
-
-            switch (iFlight)
+            catch (Exception ex)
             {
-                case 1:
-                    fillSeats("Seat", passengerList);
-
-                    break;
-
-                case 2:
-                    fillSeats("SeatA", passengerList);
-
-                    break;
-
+                HandleError(MethodInfo.GetCurrentMethod().DeclaringType.Name,
+                    MethodInfo.GetCurrentMethod().Name, ex.Message);
             }
 
         }
@@ -248,39 +295,72 @@ namespace Assignment6AirlineReservation
                 if (this.lblPassenger != null)
                 {
                     this.lblPassenger.Background = Brushes.Red;
+
                 }
 
                 clsPassengers passenger = cbChoosePassenger.SelectedItem as clsPassengers;
                 currentPassenger = passenger;
 
-                if (passenger != null && passenger.sSeatNumber != "0")
+                if(passenger == null)
+                {
+                    string sSelectedSeat = this.lblPassenger.Content.ToString();
+
+                    foreach (clsPassengers passengerLoop in cbChoosePassenger.Items)
+                    {
+                        if (passengerLoop.sSeatNumber == sSelectedSeat)
+                        {
+                            cbChoosePassenger.SelectedItem = passengerLoop;
+                            currentPassenger = passengerLoop;
+                            passenger = passengerLoop;
+
+                            break;
+
+                        }
+
+                    }
+
+                    if (cbChoosePassenger.SelectedIndex != -1)
+                    {
+                        return;
+
+                    }
+
+                    if (currentPassenger == null)
+                    {
+                        throw new Exception("Unable to locate passenger");
+
+                    }
+
+                }
+
+                if (passenger.sSeatNumber != "0")
                 {
                     // again used as the grids used have different naming conventions. Seat1 vs SeatA1
                     switch (this.iFlightID)
                     {
                         case 1:
-                            this.lblPassenger = (Label)this.FindName($"Seat{passenger.sSeatNumber}");
+                            this.lblPassenger = (Label)this.FindName($"SeatA{passenger.sSeatNumber}");
                             this.lblPassenger.Background = Brushes.ForestGreen;
 
                             break;
 
                         case 2:
-                            this.lblPassenger = (Label)this.FindName($"SeatA{passenger.sSeatNumber}");
+                            this.lblPassenger = (Label)this.FindName($"Seat{passenger.sSeatNumber}");
                             this.lblPassenger.Background = Brushes.ForestGreen;
 
                             break;
 
                     }
 
-                    lblPassengersSeatNumber.Content = passenger.sSeatNumber;
-
                 }
                 else if (passenger.sSeatNumber == "0")
                 {
-                    
+                    changeSeatFunction();
 
                 }
-               
+
+                lblPassengersSeatNumber.Content = passenger.sSeatNumber;
+
             }
             catch (Exception ex)
             {
@@ -299,22 +379,31 @@ namespace Assignment6AirlineReservation
         /// </summary>
         private void fillSeats(string sSeat, List<clsPassengers> passengerList)
         {
-            foreach (clsPassengers passenger in passengerList)
+            try
             {
-                if (passenger.sSeatNumber != "0")
+                foreach (clsPassengers passenger in passengerList)
                 {
-                    string sSeatNum = passenger.sSeatNumber;
-
-                    Label lblFilledSeats = (Label)this.FindName($"{sSeat}{sSeatNum}");
-
-                    if (lblFilledSeats != null)
+                    if (passenger.sSeatNumber != "0")
                     {
-                        lblFilledSeats.Background = Brushes.Red;
+                        string sSeatNum = passenger.sSeatNumber;
+
+                        Label lblFilledSeats = (Label)this.FindName($"{sSeat}{sSeatNum}");
+
+                        if (lblFilledSeats != null)
+                        {
+                            lblFilledSeats.Background = Brushes.Red;
+
+                        }
 
                     }
 
                 }
-                
+
+            }
+            catch (Exception ex)
+            {
+                HandleError(MethodInfo.GetCurrentMethod().DeclaringType.Name,
+                    MethodInfo.GetCurrentMethod().Name, ex.Message);
             }
 
         }
@@ -345,54 +434,117 @@ namespace Assignment6AirlineReservation
         /// </summary>
         private void changeSeat(int iPassengerID, string sSeatNumber)
         {
-            cmdAddPassenger.IsEnabled = false;
-            cmdDeletePassenger.IsEnabled = false;
+            try
+            {
+                cmdAddPassenger.IsEnabled = false;
+                cmdDeletePassenger.IsEnabled = false;
 
-            clsChangeSeat clsChangeSeat = new clsChangeSeat();
+                clsChangeSeat clsChangeSeat = new clsChangeSeat();
 
-            clsChangeSeat.changeSeat(this.iFlightID, iPassengerID, sSeatNumber);
+                clsChangeSeat.changeSeat(this.iFlightID, iPassengerID, sSeatNumber);
 
-            passengerCmbobx(this.iFlightID);
+            }
+            catch (Exception ex)
+            {
+                HandleError(MethodInfo.GetCurrentMethod().DeclaringType.Name,
+                    MethodInfo.GetCurrentMethod().Name, ex.Message);
+            }
 
         }
 
         /// <summary>
-        /// called when change seat button is clicked. Method will change all unoccupied seats click function.
+        /// Button requires sender and routedEventArgs, all logic is handled in changeSeatFunction() 
         /// </summary>
-        private void changeSeatClickFunction()
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmdChangeSeat_Click(object sender, RoutedEventArgs e)
         {
-            switch (this.iFlightID)
+            try
             {
-                case 1:
-                    for (int i = 0; i < 15; i++)
-                    {
-                        Label lblFilledSeats = (Label)this.FindName($"SeatA{i}");
-                        if (lblFilledSeats.Background != Brushes.Red && lblFilledSeats != null)
-                        {
-                            lblFilledSeats.MouseLeftButtonUp -= Seati_MouseLeftButtonUp;
-                            lblFilledSeats.MouseLeftButtonUp += changeSeatMouseClick;
+                changeSeatFunction();
 
-                        }
+            }
+            catch (Exception ex)
+            {
+                HandleError(MethodInfo.GetCurrentMethod().DeclaringType.Name,
+                    MethodInfo.GetCurrentMethod().Name, ex.Message);
+            }
+            
+        }
+
+        /// <summary>
+        /// called when change seat button is clicked or selected passenger seat is unassigned (aka seat number 0). Method will change all unoccupied seats click function.
+        /// </summary>
+        private void changeSeatFunction()
+        {
+            try
+            {
+                int iSeatCount = 0;
+                string sSeatFlightHeader = "";
+
+                sFilledSeatsArr = new string[cbChoosePassenger.Items.Count];
+
+                cbChooseFlight.IsEnabled = false;
+                cbChoosePassenger.IsEnabled = false;
+                cmdChangeSeat.IsEnabled = false;
+                cmdAddPassenger.IsEnabled = false;
+                cmdDeletePassenger.IsEnabled = false;
+
+                switch (this.iFlightID)
+                {
+                    case 1:
+                        iSeatCount = 15;
+                        sSeatFlightHeader = "SeatA";
+
+                        break;
+
+                    case 2:
+                        iSeatCount = 16;
+                        sSeatFlightHeader = "Seat";
+
+                        break;
+
+                }
+
+                if (this.currentPassenger.sSeatNumber != "0")
+                {
+                    Label lblCurrentSeat = (Label)this.FindName($"{sSeatFlightHeader}{this.currentPassenger.sSeatNumber}");
+                    lblCurrentSeat.Background = Brushes.Blue;
+
+                }
+
+                this.currentPassenger.sSeatNumber = "0";
+
+                int iTempCount = 0;
+
+                foreach (clsPassengers passenger in cbChoosePassenger.Items)
+                {
+                    sFilledSeatsArr[iTempCount] = passenger.sSeatNumber;
+
+                    iTempCount++;
+
+                }
+
+                for (int i = 0; i < iSeatCount; i++)
+                {
+
+                    if (!sFilledSeatsArr.Contains(i.ToString()))
+                    {
+                        Label lblFilledSeats = (Label)this.FindName($"{sSeatFlightHeader}{i}");
+
+                        lblFilledSeats.MouseLeftButtonUp -= Seati_MouseLeftButtonUp;
+                        lblFilledSeats.MouseLeftButtonUp += changeSeatMouseClick;
+
 
                     }
 
-                    break;
+                }
 
-                case 2:
-                    for (int i = 0; i < 16; i++)
-                    {
-                        Label lblFilledSeats = (Label)this.FindName($"SeatA{i}");
-                        if (lblFilledSeats.Background != Brushes.Red && lblFilledSeats != null)
-                        {
-                            lblFilledSeats.MouseLeftButtonUp -= Seati_MouseLeftButtonUp;
-                            lblFilledSeats.MouseLeftButtonUp += changeSeatMouseClick;
-
-                        }
-
-                    }
-
-                    break;
-
+            }
+            catch (Exception ex)
+            {
+                HandleError(MethodInfo.GetCurrentMethod().DeclaringType.Name,
+                    MethodInfo.GetCurrentMethod().Name, ex.Message);
             }
 
         }
@@ -422,31 +574,196 @@ namespace Assignment6AirlineReservation
         /// <param name="e"></param>
         private void Seati_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            Label lblClicked = sender as Label;
-
-            string lblName = lblClicked.Content.ToString();
-
-            foreach (clsPassengers passenger in cbChoosePassenger.ItemsSource)
+            try
             {
-                if (passenger.sSeatNumber == lblName)
+                Label lblClicked = sender as Label;
+
+                string lblName = lblClicked.Content.ToString();
+
+                cbChooseFlight.IsEnabled = true;
+                cbChoosePassenger.IsEnabled = true;
+                cmdChangeSeat.IsEnabled = true;
+                cmdAddPassenger.IsEnabled = true;
+                cmdDeletePassenger.IsEnabled = true;
+
+                foreach (clsPassengers passenger in cbChoosePassenger.ItemsSource)
                 {
-                    cbChoosePassenger.SelectedItem = passenger;
-                    break;
+                    if (passenger.sSeatNumber == lblName)
+                    {
+                        cbChoosePassenger.SelectedItem = passenger;
+                        break;
+
+                    }
+
+                }
+
+                //lblPassengersSeatNumber.Content = lblName;
+
+            }
+            catch (Exception ex)
+            {
+                HandleError(MethodInfo.GetCurrentMethod().DeclaringType.Name,
+                    MethodInfo.GetCurrentMethod().Name, ex.Message);
+            }
+            
+        }
+
+        /// <summary>
+        /// change seat when the user clicks on the label to select the seat for either a new passenger or an existing passenger.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void changeSeatMouseClick(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                Label lblClicked = sender as Label;
+
+                this.lblPassenger = lblClicked;
+
+                string lblName = lblClicked.Content.ToString();
+
+                int iSeatCount = 0;
+                string sSeatFlightHeader = "";
+
+                changeSeat(this.currentPassenger.iPassengerID, lblName);
+                passengerCmbobx(this.iFlightID);
+
+                switch (this.iFlightID)
+                {
+                    case 1:
+                        iSeatCount = 15;
+                        sSeatFlightHeader = "SeatA";
+
+                        break;
+
+                    case 2:
+                        iSeatCount = 16;
+                        sSeatFlightHeader = "Seat";
+
+                        break;
+
+                }
+
+                cbChoosePassenger.SelectionChanged -= cbChoosePassenger_SelectionChanged;
+                cbChoosePassenger.SelectedIndex = -1;
+                cbChoosePassenger.SelectionChanged += cbChoosePassenger_SelectionChanged;
+
+                /*foreach (clsPassengers passenger in cbChoosePassenger.Items)
+                {
+                    if (passenger.sSeatNumber == lblName)
+                    {
+                        currentPassenger = passenger;
+
+                        cbChoosePassenger.SelectedItem = passenger;
+                    }
+
+                }*/
+
+                Label lblNewSeat = (Label)this.FindName($"{sSeatFlightHeader}{lblName}");
+                lblNewSeat.Background = Brushes.Red;
+
+                for (int i = 0; i < iSeatCount; i++)
+                {
+                    Label lblFilledSeats = (Label)this.FindName($"{sSeatFlightHeader}{i}");
+                    if (lblFilledSeats != null && !sFilledSeatsArr.Contains(i.ToString()))
+                    {
+                        lblFilledSeats.MouseLeftButtonUp += Seati_MouseLeftButtonUp;
+                        lblFilledSeats.MouseLeftButtonUp -= changeSeatMouseClick;
+
+                    }
+
+                }
+
+                cbChooseFlight.IsEnabled = true;
+                cbChoosePassenger.IsEnabled = true;
+                cmdChangeSeat.IsEnabled = true;
+                cmdAddPassenger.IsEnabled = true;
+                cmdAddPassenger.IsEnabled = true;
+                cmdDeletePassenger.IsEnabled = true;
+                lblPassengersSeatNumber.Content = lblName;
+
+
+
+            }
+            catch (Exception ex)
+            {
+                HandleError(MethodInfo.GetCurrentMethod().DeclaringType.Name,
+                    MethodInfo.GetCurrentMethod().Name, ex.Message);
+            }
+
+        }
+
+        /// <summary>
+        /// delete currently selected passenger in combo box.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmdDeletePassenger_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                clsDeletePassenger deletePassenger = new clsDeletePassenger();
+
+                clsPassengers passengerToDelete = cbChoosePassenger.SelectedItem as clsPassengers;
+
+                //deletePassenger.deletePassenger(passengerToDelete.iPassengerID, this.iFlightID);
+
+                string sSeatFlightHeader = "";
+                string sPassengerSeatNum = passengerToDelete.sSeatNumber;
+
+                switch (this.iFlightID)
+                {
+                    case 1:
+                        sSeatFlightHeader = "SeatA";
+
+                        break;
+
+                    case 2:
+                        sSeatFlightHeader = "Seat";
+
+                        break;
+
+                }
+
+                cbChoosePassenger.SelectionChanged -= cbChoosePassenger_SelectionChanged;
+                cbChoosePassenger.ItemsSource = null;
+                cbChoosePassenger.Items.Clear();
+                cbChoosePassenger.SelectedIndex = -1;
+                cbChoosePassenger.SelectionChanged += cbChoosePassenger_SelectionChanged;
+
+                Label lblPassengerSeat = (Label)this.FindName($"{sSeatFlightHeader}{sPassengerSeatNum}");
+
+                lblPassengerSeat.Background = Brushes.Blue;
+
+                deletePassenger.deletePassenger(passengerToDelete.iPassengerID, this.iFlightID);
+
+                passengerCmbobx(this.iFlightID);
+
+                this.currentPassenger = null;
+
+                cbChooseFlight.SelectionChanged -= cbChooseFlight_SelectionChanged;
+                cbChooseFlight.SelectedIndex = -1;
+                cbChooseFlight.SelectionChanged += cbChooseFlight_SelectionChanged;
+
+                foreach (clsFlights flight in cbChooseFlight.Items)
+                {
+                    if (this.iFlightID == flight.iFlightID)
+                    {
+                        cbChooseFlight.SelectedItem = flight;
+                        cbChooseFlight.UpdateLayout();
+
+                    }
 
                 }
 
             }
-
-            //lblPassengersSeatNumber.Content = lblName;
-
-        }
-
-
-        private void changeSeatMouseClick(object sender, MouseButtonEventArgs e)
-        {
-
+            catch (Exception ex)
+            {
+                HandleError(MethodInfo.GetCurrentMethod().DeclaringType.Name,
+                    MethodInfo.GetCurrentMethod().Name, ex.Message);
+            }
 
         }
-
     }
 }

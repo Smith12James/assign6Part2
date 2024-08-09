@@ -26,7 +26,16 @@ namespace Assignment6AirlineReservation.Logic
         /// <param name="sSeatNumber"></param>
         public void changeSeat(int iFlightID, int iPassengerID, string sSeatNumber)
         {
-            clsDB.ExecuteNonQuery(clsSQL.updateSeatNumber(sSeatNumber, iFlightID, iPassengerID));
+            try
+            {
+                clsDB.ExecuteNonQuery(clsSQL.updateSeatNumber(sSeatNumber, iFlightID, iPassengerID));
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+
+            }
 
         }
 
